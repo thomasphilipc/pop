@@ -12,7 +12,7 @@ async def main(msg: func.QueueMessage) -> None:
 
     payload=json.loads(msg.get_body())    
     endpoint = "https://mapon.com/"
-    path = "api/v1/unit/list.json?key="+payload['apiKey']
+    path = "api/v1/unit/list.json?include=device&key="+payload['apiKey']
     params=""
     for i in payload["units"]:
         params+="&unit_id[]="+str(i)
@@ -50,6 +50,8 @@ def process_response(payload):
         entry.speed = item['speed']
         entry.last_update = item['last_update']
         entry.created_at = item['created_at']
+        entry.imei = item['device']['imei']
+        entry.boxId = item['device']['id']
         #asset_data = {'RowKey': item['unit_id'], 'PartitionKey': item['company_id'], 'country_code': item['country_code'],
         #            'label': item['label'], 'number': item['number'], 'lat': item['lat'], 'lng': item['lng'],
         #            'direction': item['direction'], 'speed': item['speed'], 'last_update': item['last_update'],
