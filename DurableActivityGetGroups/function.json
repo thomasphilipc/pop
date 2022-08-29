@@ -1,0 +1,18 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "name",
+      "type": "activityTrigger",
+      "direction": "in"
+    },
+    {
+      "type": "table",
+      "direction": "in",
+      "name": "clientsJSON",
+      "tableName": "clientTable",
+      "take": "50",
+      "connection": "AzureWebJobsStorage"
+    }
+  ]
+}

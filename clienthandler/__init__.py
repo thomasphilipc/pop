@@ -26,12 +26,11 @@ def main(req: func.HttpRequest, clientTable: func.Out[str]) -> func.HttpResponse
 
 
     data = {
-        "PartitionKey": "master",
-        "RowKey": clientId,
+        "PartitionKey": clientId,
+        "RowKey": group,
         "apiKey" : apiKey,
         "clientKey" : clientKey,
         "clientName" : clientName,
-        "group" : group,
         "enabled" : enabled
     }
 

@@ -1,17 +1,26 @@
+# This function is not intended to be invoked directly. Instead it will be
+# triggered by an orchestrator function.
+# Before running this sample, please:
+# - create a Durable orchestration function
+# - create a Durable HTTP starter function
+# - add azure-functions-durable to requirements.txt
+# - run pip install -r requirements.txt
+
 import logging
-import requests
 import json
-import azure.functions as func
+import requests
 
 
-def main(msg: func.QueueMessage, clientUnits: func.Out[str]) -> None:
-    logging.info('Processed queue')
-    payload=json.loads(msg.get_body())    
-    group_id= payload['group']
+
+
+def main(payload) -> str:
+    logging.info( " data  in durable activityGetUnits is format %s",str(payload))
+    #payload=json.dumps(payload)
+    group_id= payload['RowKey']
     apikey=payload['apiKey']
     units=get_units(group_id,apikey)
     payload['units']=units
-    clientUnits.set(json.dumps(payload))
+    return payload
 
 
 def get_units(group_id,apikey):
@@ -32,4 +41,5 @@ def get_units(group_id,apikey):
     if(unit_ids['units']):
         for unit in unit_ids['units']:
             total_units.append(unit['id'])
+    logging.info( " data  output in durable activityGetUnits is format %s",str(total_units))
     return (total_units)
