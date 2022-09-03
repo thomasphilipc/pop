@@ -1,0 +1,31 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "get",
+        "post"
+      ],
+      "route": "units/{clientKey}"
+      
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return" 
+    },
+    {
+      "type": "table",
+      "direction": "in",
+      "name": "inputTable",
+      "tableName": "clientTable",
+      "take": "200",
+      "filter": "(clientKey eq '{clientKey}')",
+      "connection": "AzureWebJobsStorage"
+    }
+  ]
+}

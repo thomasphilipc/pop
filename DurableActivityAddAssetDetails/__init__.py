@@ -21,17 +21,17 @@ def process_response(payload):
         entry = Entity()
         entry.RowKey = str(item['unit_id'])
         entry.PartitionKey = str(item['company_id'])
-        entry.country_code = item['country_code']
-        entry.label = item['label']
-        entry.assetName = item['number']
+        entry.country_code = str(item['country_code'])
+        entry.label = str(item['label'])
+        entry.assetName = str(item['number'])
         entry.lat= item['lat']
         entry.lon = item['lng']
         entry.direction = item['direction']
         entry.speed = item['speed']
         entry.last_update = item['last_update']
         entry.created_at = item['created_at']
-        entry.imei = item['device']['imei']
-        entry.boxId = item['device']['id']
+        entry.imei = str(item['device']['imei'])
+        entry.boxId = str(item['device']['id'])
         #entry.companyName = item
         responselist.append(entry)
     
