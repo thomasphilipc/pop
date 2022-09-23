@@ -18,8 +18,14 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     logging.info(type(payload))
     parallel_tasks = [ context.call_activity("DurableActivityGetUnits", b) for b in payload ]
     outputs = yield context.task_all(parallel_tasks)
+   #added to save custom fields to client table as a look up
+    parallel_customfield_tasks = [ context.call_activity("DurableActivityAddCustomFieldtoMaster", b) for b in payload ]
+    cf_outputs = yield context.task_all(parallel_customfield_tasks)
     parallel_tasks2 = [ context.call_activity("DurableActivityAddAssetDetails", b) for b in outputs ]
     outputs2 = yield context.task_all(parallel_tasks2)
+    #added to get custom fields to each asset
+    parallel_tasks3 = [ context.call_activity("DurableActivityAddCustomFieldDetails", b) for b in outputs ]
+    outputs3 = yield context.task_all(parallel_tasks3)
     return [payload, outputs, outputs2]
 
 main = df.Orchestrator.create(orchestrator_function)

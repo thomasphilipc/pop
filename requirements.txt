@@ -6,4 +6,4 @@ azure-functions
 requests
 httpx
 azure-cosmosdb-table
-azure-functions-durable>=1.0.0b12
+azure-functions-durable
