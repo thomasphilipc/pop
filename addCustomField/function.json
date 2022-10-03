@@ -15,6 +15,22 @@
       "type": "http",
       "direction": "out",
       "name": "$return"
+    },
+    {
+      "type": "table",
+      "direction": "out",
+      "name": "customfieldTable",
+      "tableName": "customfieldTable",
+      "connection": "AzureWebJobsStorage"
+    },
+    {
+      "type": "table",
+      "direction": "in",
+      "name": "inputTable",
+      "tableName": "clientTable",
+      "take": "200",
+      "filter": "(clientKey eq '{clientKey}')",
+      "connection": "AzureWebJobsStorage"
     }
   ]
 }

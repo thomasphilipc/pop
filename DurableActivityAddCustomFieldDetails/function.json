@@ -1,0 +1,17 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "result2",
+      "type": "activityTrigger",
+      "direction": "in"
+    },
+    {
+      "type": "queue",
+      "direction": "out",
+      "name": "changemanagementqueue",
+      "queueName": "changemanagementqueue",
+      "connection": "AZURE_STORAGE_CONNECTION_STRING"
+    }
+  ]
+}

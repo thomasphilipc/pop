@@ -7,3 +7,6 @@ requests
 httpx
 azure-cosmosdb-table
 azure-functions-durable
+azure-storage-blob
+pandas
+openpyxl
