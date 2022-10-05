@@ -10,13 +10,13 @@ import ssl
 
 def send_mail(to_email,message, from_email='helpdesk@vectorglobe.com'):
     # import smtplib
-    email_password = "BE3/FwGJncmCHD6jGJK+yO72PhtMUyxXgbBqwMujOxqM"
-    email_username = "AKIAVDC7VR5F4WH7RP7E"
+    email_password = os.environ["email_password"]
+    email_username = os.environ["email_username"]
     context = ssl.create_default_context()
     port=587
     req_message = message.encode('utf-8')
 
-    smtp_server="email-smtp.us-west-2.amazonaws.com"
+    smtp_server= os.environ["smtp_server"]
     with smtplib.SMTP(smtp_server, port) as server:
         server.starttls(context=context)
         server.login(email_username, email_password)
