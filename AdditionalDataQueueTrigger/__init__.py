@@ -8,7 +8,7 @@ import re
 
 
 def main(msg: func.QueueMessage) -> None:
-    logging.info('Python queue trigger function processed a queue item: %s',
+    logging.info('Python additional Data Queue Trigger: %s',
                  msg.get_body().decode('utf-8'))
 
     #"{\"unit_id\": \"filecontainer/322207.xlsx\", \"htm\": \"HTm123123123123\", \"packing_list\": [\"pl1231231\", \"pl54134123\", \"pl15123123\", \"pl5123132123\"]}"
@@ -23,10 +23,10 @@ def main(msg: func.QueueMessage) -> None:
     tableName = os.environ["customfieldTableName"]
     accountName = os.environ["accountName"]
     table_service = TableService(account_name=accountName, account_key=tableStorageKey)
-    table_name = tableName
+
 
     entry = Entity()
     entry.RowKey = str(unit_id[0])
     entry.PartitionKey = "customfield"
     entry.AdditionalField = json.dumps(json_data)
-    table_service.merge_entity(table_name,entry)
+    table_service.insert_or_merge_entity(tableName,entry)

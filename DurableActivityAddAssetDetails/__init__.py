@@ -15,9 +15,13 @@ import os
 
 
 def process_response(payload):
-    jsondata=payload
+    jsondata=json.dumps(payload)
     responselist=[]
-    for item in jsondata['data']['units']:
+    logging.info(json.loads(jsondata))
+    units_list=(json.loads(jsondata)).get("data")
+    for this_item in units_list.get("units"):
+        logging.info(this_item)
+        item=json.loads(json.dumps(this_item))
         entry = Entity()
         entry.RowKey = str(item['unit_id'])
         entry.PartitionKey = str(item['company_id'])
@@ -30,8 +34,8 @@ def process_response(payload):
         entry.speed = item['speed']
         entry.last_update = item['last_update']
         entry.created_at = item['created_at']
-        entry.imei = str(item['device']['imei'])
-        entry.boxId = str(item['device']['id'])
+        entry.imei = str(item.get('device').get('imei')) if item.get('device') else "Not Available"
+        entry.boxId = str(item.get('device').get('id')) if item.get('device') else "Not Available"
         #entry.companyName = item
         responselist.append(entry)
     
@@ -62,6 +66,7 @@ async def main(result2: str) -> str:
 
     table_service = TableService(account_name=accountName, account_key=tableStorageKey)
     table_name = tableName
+    # research batch insert to handle gracefully
     for item in data:
         item['clientName']=assetgroup
         logging.info(" data to be pushed into database is %s",str(item))

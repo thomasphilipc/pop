@@ -51,7 +51,10 @@ def main(msg: func.QueueMessage) -> None:
     table_service = TableService(account_name=accountName, account_key=tableStorageKey)
     query="RowKey eq'"+str(unit_id)+"'"
     assets = table_service.query_entities(assettableName, filter=query)
-    asset_det =json.dumps(assets, indent=4,sort_keys=True, default=str )
+    if assets:
+        asset_det =json.dumps(assets, indent=4,sort_keys=True, default=str )
+    else:
+        asset_det = None
     assetsc = table_service.get_entity(customfieldTableName, row_key=unit_id, partition_key="customfield")
     for item in assets:
         asset_det_s = json.dumps(item, indent=4,sort_keys=True, default=str )
@@ -59,7 +62,7 @@ def main(msg: func.QueueMessage) -> None:
     assetscf=json.loads(json.dumps(assetsc, indent=4,sort_keys=True, default=str))
     logging.info(asset_det)
     logging.info(assetscf)
-    goods_det = json.loads(assetscf.get("AdditionalField",None))
+    goods_det = json.loads(assetscf.get("AdditionalField")) if assetscf.get("AdditionalField") else None
     cf_det = json.loads(assetscf.get("CustomField",None))
     #{
     #"PartitionKey": "8180",
@@ -80,17 +83,17 @@ def main(msg: func.QueueMessage) -> None:
     #}
     #{'PartitionKey': 'customfield', 'RowKey': '50043', 'Timestamp': datetime.datetime(2022, 10, 2, 6, 1, 17, 429404, tzinfo=tzutc()), 'CustomField': '{"PackageType": null, "PackingListUpload": null, "TrackingLink": null}', 'etag': 'W/"datetime\'2022-10-02T06%3A01%3A17.4294046Z\'"'}
     required_payload = {
-        "vehicle_reg" : asset_det["assetName"],
-        "route" : asset_det["label"],
-        "group" : asset_det["clientName"],
-        "htm" : goods_det["htm"],
-        "packing_list" : goods_det["packing_list"],
-        "tracking_link" : cf_det["TrackingLink"],
-        "alert_name" : json_data["alert_type"],
-        "location" : json_data["location"],
-        "geo_reference" : json_data["address"],
-        "alert_comment" : json_data["msg"],
-        "time" : json_data["time"]
+        "vehicle_reg" : asset_det.get("assetName"),
+        "route" : asset_det.get("label"),
+        "group" : asset_det.get("clientName"),
+        "htm" : goods_det.get("htm","Not Available") if goods_det else "Not Available",
+        "packing_list" : goods_det.get("packing_list","Not Avaialable") if goods_det else "Not Available",
+        "tracking_link" : cf_det.get("TrackingLink","Not Available"),
+        "alert_name" : json_data.get("alert_type"),
+        "location" : json_data.get("location"),
+        "geo_reference" : json_data.get("address"),
+        "alert_comment" : json_data.get("msg"),
+        "time" : json_data.get("time")
     }
     logging.info(required_payload)
     #{'vehicle_reg': 'FM920 - Beacons testing', 'route': 'VectorGlobe Fe+', 'htm': 'HTm123123123123', 'packing_list': ['pl1231231', 'pl54134123', 'pl15123123', 'pl5123132123'], 'tracking_link': 'http://please.com', 'alert_name': 'speeding', 'location': '56.71888,25.20018', 'geo_reference': 'Lici, Krapes pag., Ogres nov., Latvija', 'alert_comment': 'Driving speed is 82 km/h (Manual speed limit: 80 km/h)'}

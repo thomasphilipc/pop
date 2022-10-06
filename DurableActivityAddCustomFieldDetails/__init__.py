@@ -35,7 +35,7 @@ def process_response(payload,schema_json,i):
     entry.RowKey = str(i)
     entry.PartitionKey = "customfield"
     return_dict={}  
-    for item in payload["data"]:
+    for item in payload.get("data"):
         if item["label"] in schema_keys:
             value=process_field_type(item)
             return_dict.update(value)
@@ -52,10 +52,10 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
     
     #gather details from the OS environment
     tableStorageKey = os.environ["tableStorageKey"]
-    tableName = os.environ["customfieldTableName"]
+    table_name = os.environ["customfieldTableName"]
     accountName = os.environ["accountName"]
     table_service = TableService(account_name=accountName, account_key=tableStorageKey)
-    table_name = tableName
+   
 
     # what is the data that is passed to through the function
     #logging.info( " data recieved in durable activityaddcustomfield data is format %s",str(result2))
@@ -66,7 +66,11 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
     endpoint = "https://mapon.com/"
     path = "api/v1/unit/custom_fields.json?include=device&key="+result2['apiKey']
     response_list=[]
-    for i in result2["units"]:
+    unit_list=result2["units"]
+    logging.debug("Data that is being send out")
+    logging.debug(result2["units"])
+    print(unit_list)
+    for i in unit_list:
         params="&unit_id="+str(i)
         constructed_url = endpoint + path + params
         headers = {
@@ -76,26 +80,39 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
         client = httpx.AsyncClient()
         response = await client.get(constructed_url, headers = headers)
         payload = response.json()
+
         data=process_response(payload,schema_json,i)
+
         query="RowKey eq '"+str(i)+"'"
-        ###
+            ###
         test = []
         for entity in table_service.query_entities(table_name, filter=query):
-            test.append(entity)
-        test = json.dumps(test, indent=4, sort_keys=True, default=str)
-        db_data = json.loads(test)[0]
-        ###
-        #'{"PackageType": null, "PackingListUpload": null, "TrackingLink": null}'
-        if db_data['CustomField']!= data['CustomField']:
-            logging.info(" data variation and to be addded to list %s",str(data))
+            xtest = json.dumps(entity, indent=4,sort_keys=True, default=str )
+            test.append(json.loads(xtest))
+
+        if len(test)==0:
             response_list.append(data)
+            changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+        else :
+            db_data = test[0] 
+            ###
+            #'{"PackageType": null, "PackingListUpload": null, "TrackingLink": null}'
+            if db_data.get('CustomField') != data.get('CustomField'):
+                logging.info(" data variation and to be addded to database and queue %s",str(data))
+                changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+                response_list.append(data)
+            elif db_data.get('AdditionalField', None) == None:
+                changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+                logging.info(" data variation not found but additional data needs to be processed %s",str(data))
+            else:
+                logging.info(" data variation not found  %s",str(data))
 
 
     #logging.info(" data to be pushed into database is %s",str(data))
     for data in response_list:
-        changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+        logging.info(json.dumps(data, indent=4,sort_keys=True, default=str ))
         table_service.insert_or_replace_entity(table_name,data)
-    return "Devices have been added and no output at this stage"
+    return "did something"
     
     
     #below cannot be done on a single call and needs to be split to different calls and processed individually

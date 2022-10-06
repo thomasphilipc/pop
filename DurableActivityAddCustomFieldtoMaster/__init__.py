@@ -10,7 +10,6 @@ import requests
 
 
 def main(payload) -> str:
-    logging.info( " data  in durable AddCustomField is format %s",str(payload))
     #payload=json.dumps(payload)
     group_id= payload['RowKey']
     apikey=payload['apiKey']
@@ -18,11 +17,12 @@ def main(payload) -> str:
     if unit_id == None:
         logging.info( "No units in group hence cant get custom fields")
     else:
+        payload['units']= total_units
         payload['total_units']=len(total_units)
         customField=get_custom_field(unit_id,apikey)
         payload['customField']=customField
-        output=saveToClientTable(payload)
-        logging.info( " data  in durable AddCustomField is format %s",str(output))
+        saveToClientTable(payload)
+
     return payload
 
 def saveToClientTable(payload):
@@ -34,10 +34,14 @@ def saveToClientTable(payload):
     accountName = os.environ["accountName"]
     logging.info( " data recieved to save is  %s",str(payload))
     entry = Entity()
-    entry.RowKey = str(payload['RowKey'])
-    entry.PartitionKey = str(payload['PartitionKey'])
-    entry.total_units = str(payload['total_units'])
-    entry.customField = str(payload['customField'])
+    entry.RowKey = str(payload.get('RowKey'))
+    entry.PartitionKey = str(payload.get('PartitionKey'))
+    entry.total_units = str(payload.get('total_units',0))
+    unit_list= []
+    for item in (payload.get('units',None)):
+        unit_list.append(str(item))
+    entry.units =  str(unit_list)
+    entry.customField = str(payload.get('customField'))
     table_service = TableService(account_name=accountName, account_key=tableStorageKey)
     table_name = tableName
     table_service.insert_or_merge_entity(table_name,entry)
@@ -60,8 +64,6 @@ def get_first_unit(group_id,apikey):
         if (unit_ids['units']):
             for unit in unit_ids['units']:
                 total_units.append(unit['id'])
-
-        print(len(total_units))
         return(total_units[0],total_units)
     except:
         return (None,None)
@@ -75,7 +77,6 @@ def get_custom_field(unit_id,apikey):
     }
     response = requests.request("GET", url, headers=headers, data=payload)
     responserecvd = json.loads(response.text.encode('utf8'))
-    print (responserecvd)
     cf_asset = responserecvd['data']
     for item in cf_asset:
         try:

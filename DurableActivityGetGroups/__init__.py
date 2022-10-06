@@ -11,7 +11,7 @@ import json
 
 
 def main(name: str, clientsJSON) -> str:
-    logging.info("data read from database is %s",str(clientsJSON))
+    # todo
+    # can do some processing to reduce the data that goes onwards or logic to handle something further in orchestrator
     payload = json.loads(clientsJSON)
-    logging.info("data output from activitygetgroups is %s",str(payload))
     return payload

@@ -15,13 +15,6 @@
       "type": "http",
       "direction": "out",
       "name": "$return"
-    },
-    {
-      "type": "table",
-      "direction": "out",
-      "name": "clientTable",
-      "tableName": "clientTable",
-      "connection": "AzureWebJobsStorage"
     }
   ]
 }

@@ -14,16 +14,33 @@ import azure.durable_functions as df
 
 
 def orchestrator_function(context: df.DurableOrchestrationContext):
+    #a data can be passed in this case it is test
+    # the first function does the following
+    # Input - a text called test is passed - no processing or value
+    # processing gets all the clients from the clientstable and sends this onwards
+    # Output  - a dump of all columns and rows of the clientTable
     payload = yield context.call_activity("DurableActivityGetGroups","test")
-    logging.info(type(payload))
+    # now parallel tasks are running on each client
+    # input a client detail item from the list is split across
+    # processing - each function gets one set of data for a client
+    # Output - a collection of apikey, group and units are packed as a list and returned
+    # The parallel tasks will now be a list of the collection 
     parallel_tasks = [ context.call_activity("DurableActivityGetUnits", b) for b in payload ]
     outputs = yield context.task_all(parallel_tasks)
-   #added to save custom fields to client table as a look up
+    # Parallel process with the above client data is done to add custom field schema to client table 
+    # input a client detail item from db as the list is split across
+    # processing - each function gets one set of data for a client to gather the schema, units and total units are added to the database
+    # Output - the custom field, total units and units are saved back to the database
     parallel_customfield_tasks = [ context.call_activity("DurableActivityAddCustomFieldtoMaster", b) for b in payload ]
     cf_outputs = yield context.task_all(parallel_customfield_tasks)
+    # process to add asset details to the asset database
+    # input a client detail item from db as the list is split across
+    # Output Each units is added with the master details to asset tables
     parallel_tasks2 = [ context.call_activity("DurableActivityAddAssetDetails", b) for b in outputs ]
     outputs2 = yield context.task_all(parallel_tasks2)
     #added to get custom fields to each asset
+    # input a collection of apikey, group and units are packed as a list fanned out
+    # Output Each units custom field is added on a custom field table
     parallel_tasks3 = [ context.call_activity("DurableActivityAddCustomFieldDetails", b) for b in outputs ]
     outputs3 = yield context.task_all(parallel_tasks3)
     return [payload, outputs, outputs2]
