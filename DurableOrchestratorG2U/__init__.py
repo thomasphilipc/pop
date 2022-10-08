@@ -27,12 +27,6 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     # The parallel tasks will now be a list of the collection 
     parallel_tasks = [ context.call_activity("DurableActivityGetUnits", b) for b in payload ]
     outputs = yield context.task_all(parallel_tasks)
-    # Parallel process with the above client data is done to add custom field schema to client table 
-    # input a client detail item from db as the list is split across
-    # processing - each function gets one set of data for a client to gather the schema, units and total units are added to the database
-    # Output - the custom field, total units and units are saved back to the database
-    parallel_customfield_tasks = [ context.call_activity("DurableActivityAddCustomFieldtoMaster", b) for b in payload ]
-    cf_outputs = yield context.task_all(parallel_customfield_tasks)
     # process to add asset details to the asset database
     # input a client detail item from db as the list is split across
     # Output Each units is added with the master details to asset tables

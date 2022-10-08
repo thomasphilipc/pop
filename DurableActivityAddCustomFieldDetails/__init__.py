@@ -60,7 +60,7 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
     # what is the data that is passed to through the function
     #logging.info( " data recieved in durable activityaddcustomfield data is format %s",str(result2))
     #gathering the schema
-    schema_text=result2['customField'].replace("'",'''"''')
+    schema_text=json.dumps(result2['customField']).replace("'",'''"''')
     # possiblility for error on the line above
     schema_json=json.loads(schema_text)
     endpoint = "https://mapon.com/"
