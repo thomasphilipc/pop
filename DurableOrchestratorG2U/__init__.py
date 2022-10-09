@@ -11,7 +11,7 @@ import json
 
 import azure.functions as func
 import azure.durable_functions as df
-
+import itertools
 
 def orchestrator_function(context: df.DurableOrchestrationContext):
     #a data can be passed in this case it is test
@@ -37,6 +37,12 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     # Output Each units custom field is added on a custom field table
     parallel_tasks3 = [ context.call_activity("DurableActivityAddCustomFieldDetails", b) for b in outputs ]
     outputs3 = yield context.task_all(parallel_tasks3)
-    return [payload, outputs, outputs2]
+    action_list=[]
+    for item in itertools.chain.from_iterable(outputs3):
+        action_list.append(item)
+    parallel_tasks4 = [ context.call_activity("DurableActivityProcessFile", b) for b in action_list ]
+    outputs4 = yield context.task_all(parallel_tasks4)
+
+    return [payload, outputs, outputs2,outputs3,outputs4]
 
 main = df.Orchestrator.create(orchestrator_function)

@@ -55,7 +55,8 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
     table_name = os.environ["customfieldTableName"]
     accountName = os.environ["accountName"]
     table_service = TableService(account_name=accountName, account_key=tableStorageKey)
-   
+    # return
+    result=[]
 
     # what is the data that is passed to through the function
     #logging.info( " data recieved in durable activityaddcustomfield data is format %s",str(result2))
@@ -92,27 +93,30 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
 
         if len(test)==0:
             response_list.append(data)
-            changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+            table_service.insert_or_replace_entity(table_name,data)
+            #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
         else :
             db_data = test[0] 
             ###
             #'{"PackageType": null, "PackingListUpload": null, "TrackingLink": null}'
             if db_data.get('CustomField') != data.get('CustomField'):
                 logging.info(" data variation and to be addded to database and queue %s",str(data))
-                changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
-                response_list.append(data)
+                table_service.insert_or_replace_entity(table_name,data)
+                response_list.append(json.dumps(data, indent=4, sort_keys=True, default=str))
+                #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
             elif db_data.get('AdditionalField', None) == None:
-                changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+                response_list.append(json.dumps(data, indent=4, sort_keys=True, default=str))
+                #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
                 logging.info(" data variation not found but additional data needs to be processed %s",str(data))
             else:
                 logging.info(" data variation not found  %s",str(data))
 
 
     #logging.info(" data to be pushed into database is %s",str(data))
-    for data in response_list:
-        logging.info(json.dumps(data, indent=4,sort_keys=True, default=str ))
-        table_service.insert_or_replace_entity(table_name,data)
-    return "did something"
+    #for data in response_list:
+    #    logging.info(json.dumps(data, indent=4,sort_keys=True, default=str ))
+    #    table_service.insert_or_replace_entity(table_name,data)
+    return response_list
     
     
     #below cannot be done on a single call and needs to be split to different calls and processed individually
