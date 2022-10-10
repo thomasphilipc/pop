@@ -50,23 +50,15 @@ def process_link(link,filename):
 
 def main(name: str) -> str:
 
-    logging.info(name)
-    print(name)
-    #data incoming sample
-    #{
-    #"CustomField": "{\"PackageType\": \"type 2\", \"PackingListUpload\": \"https://mapon.com/file.php?6292547$c0099b9a0451d6202d3bb5\", \"TrackingLink\": \"http://please.com\"}",
-    #"PartitionKey": "customfield",
-    #"RowKey": "322207"
-    #}
-    #obtain link from the queue
-    ####
-    json_data=json.loads(name)
-    json_customfield=json.loads(json_data["CustomField"])
+    json_data = json.loads(name)
 
-    unit_id=json_data.get("RowKey")
-    link=json_customfield.get("PackingListUpload")
+    json_customfield = json.loads(json_data.get("CustomField"))
 
-    filename=unit_id+".xlsx"
+    unit_id = json_data.get("RowKey")
+    link = json_customfield.get("PackingListUpload")
+
+    filename = unit_id + ".xlsx"
+
     result= process_link(link,filename)
     
     return f" {result}!"
