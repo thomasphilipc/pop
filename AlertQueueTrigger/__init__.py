@@ -98,7 +98,7 @@ def main(msg: func.QueueMessage) -> None:
     logging.info(required_payload)
     #{'vehicle_reg': 'FM920 - Beacons testing', 'route': 'VectorGlobe Fe+', 'htm': 'HTm123123123123', 'packing_list': ['pl1231231', 'pl54134123', 'pl15123123', 'pl5123132123'], 'tracking_link': 'http://please.com', 'alert_name': 'speeding', 'location': '56.71888,25.20018', 'geo_reference': 'Lici, Krapes pag., Ogres nov., Latvija', 'alert_comment': 'Driving speed is 82 km/h (Manual speed limit: 80 km/h)'}
 
-    req_subject = required_payload["vehicle_reg"] + " on route " + required_payload.get("group", "Not Available") + "/" + required_payload["route"] + required_payload["alert_comment"]
+    req_subject = required_payload["vehicle_reg"] + " on route " + required_payload.get("group", "Not Available") + "/" + required_payload["route"]  + " " +  required_payload["alert_comment"]
 
     req_message ="Subject: "+req_subject+"\n\n"
     req_message += "Hi Customer," + "\n"
