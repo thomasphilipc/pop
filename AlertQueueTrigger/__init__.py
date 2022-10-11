@@ -103,7 +103,7 @@ def main(msg: func.QueueMessage) -> None:
     req_message ="Subject: "+req_subject+"\n\n"
     req_message += "Hi Customer," + "\n"
     req_message += req_subject + "\n"
-    req_message += "Alert triggered at location coordinate " + required_payload["location"] + " which is " + required_payload["geo_reference"] + " on " + required_payload["time"] + " and the reason was " + required_payload["alert_comment"] + "\n"
+    req_message += "An alert was triggered at location https://www.google.com/maps/place/" + required_payload["location"] + " near " + required_payload["geo_reference"] + " on " + required_payload["time"] + " and the reason was " + required_payload["alert_comment"] + "\n"
     req_message += "You can access the live location using the tracking link " + required_payload["tracking_link"] + "\n\n"
     req_message += "The additional details for this are " + "\n"
     req_message += "HTM Number :" + required_payload["htm"] + "\n"
