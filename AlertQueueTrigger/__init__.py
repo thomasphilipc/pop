@@ -98,15 +98,16 @@ def main(msg: func.QueueMessage) -> None:
     logging.info(required_payload)
     #{'vehicle_reg': 'FM920 - Beacons testing', 'route': 'VectorGlobe Fe+', 'htm': 'HTm123123123123', 'packing_list': ['pl1231231', 'pl54134123', 'pl15123123', 'pl5123132123'], 'tracking_link': 'http://please.com', 'alert_name': 'speeding', 'location': '56.71888,25.20018', 'geo_reference': 'Lici, Krapes pag., Ogres nov., Latvija', 'alert_comment': 'Driving speed is 82 km/h (Manual speed limit: 80 km/h)'}
 
-    req_subject = required_payload["vehicle_reg"] + " on route " + required_payload.get("group", "Not Available") + "/" + required_payload["route"]  + " " +  required_payload["alert_comment"]
+    req_subject = required_payload["vehicle_reg"] + " on route " + required_payload.get("group", "Not Available") + " - " + required_payload["route"] + required_payload["alert_comment"]
 
     req_message ="Subject: "+req_subject+"\n\n"
     req_message += "Hi Customer," + "\n"
     req_message += req_subject + "\n"
-    req_message += "An alert was triggered at location https://www.google.com/maps/place/" + required_payload["location"] + " near " + required_payload["geo_reference"] + " on " + required_payload["time"] + " and the reason was " + required_payload["alert_comment"] + "\n"
-    req_message += "You can access the live location using the tracking link " + required_payload["tracking_link"] + "\n\n"
-    req_message += "The additional details for this are " + "\n"
+    req_message += "Alert Location: https://www.google.com/maps/place/" + required_payload["location"] + "\n" + " Address: " + required_payload["geo_reference"] + "\n" + " Time: " + required_payload["time"] + "\n" + " Reason: " + required_payload["alert_comment"] + "\n"
+    req_message += "Tracking Link: " + required_payload["tracking_link"] + "\n\n"
+    req_message += "The additional details for this alert are: " + "\n"
     req_message += "HTM Number :" + required_payload["htm"] + "\n"
     for item in required_payload["packing_list"]:
         req_message += item + "\n"
+    req_message += "\n\n End of message."
     send_mail(to_email="helpdesk@vectorglobe.com", message=req_message)
