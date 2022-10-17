@@ -14,7 +14,7 @@ import json
 import os
 
 
-def process_response(payload):
+def process_response(payload,assetgroup):
     jsondata=json.dumps(payload)
     responselist=[]
     logging.info(json.loads(jsondata))
@@ -30,6 +30,7 @@ def process_response(payload):
         entry.assetName = str(item['number'])
         entry.lat= item['lat']
         entry.lon = item['lng']
+        entry.clientName=assetgroup
         entry.direction = item['direction']
         entry.speed = item['speed']
         entry.last_update = item['last_update']
@@ -50,27 +51,29 @@ async def main(result2: str) -> str:
     endpoint = "https://mapon.com/"
     path = "api/v1/unit/list.json?include=device&key="+result2['apiKey']
     params=""
-    for i in result2["units"]:
-        params+="&unit_id[]="+str(i)
-    
-    constructed_url = endpoint + path + params
+    total_units=result2["units"]
+    if len(total_units)>0:
+        for i in result2["units"]:
+            params+="&unit_id[]="+str(i)
+        
+        constructed_url = endpoint + path + params
 
-    headers = {
+        headers = {
 
-       "Content-Type": "application/json"
-    }
-    client = httpx.AsyncClient()
-    response = await client.get(constructed_url, headers = headers)
-    payload = response.json()
-    data=process_response(payload)
+        "Content-Type": "application/json"
+        }
+        client = httpx.AsyncClient()
+        response = await client.get(constructed_url, headers = headers)
+        payload = response.json()
+        data=process_response(payload,assetgroup)
 
-    table_service = TableService(account_name=accountName, account_key=tableStorageKey)
-    table_name = tableName
-    # research batch insert to handle gracefully
-    for item in data:
-        item['clientName']=assetgroup
-        logging.info(" data to be pushed into database is %s",str(item))
-        table_service.insert_or_replace_entity(table_name,item)
+        table_service = TableService(account_name=accountName, account_key=tableStorageKey)
+        table_name = tableName
+        # research batch insert to handle gracefully
+        for item in data:
+            logging.info(" data to be pushed into database is %s",str(item))
+            table_service.insert_or_replace_entity(table_name,item)
 
-    return "Devices have been added and no output at this stage"
-
+        return f"Devices have been added and no output at this stage for{assetgroup}"
+    else:
+         return f"No Devices have been added and no output at this stage for{assetgroup}"
