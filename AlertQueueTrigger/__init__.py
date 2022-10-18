@@ -6,6 +6,7 @@ from azure.cosmosdb.table.tableservice import TableService
 from azure.cosmosdb.table.models import Entity
 import smtplib 
 import ssl
+from datetime import datetime,timedelta
 
 
 
@@ -99,12 +100,18 @@ def main(msg: func.QueueMessage) -> None:
     logging.info(required_payload)
     #{'vehicle_reg': 'FM920 - Beacons testing', 'route': 'VectorGlobe Fe+', 'htm': 'HTm123123123123', 'packing_list': ['pl1231231', 'pl54134123', 'pl15123123', 'pl5123132123'], 'tracking_link': 'http://please.com', 'alert_name': 'speeding', 'location': '56.71888,25.20018', 'geo_reference': 'Lici, Krapes pag., Ogres nov., Latvija', 'alert_comment': 'Driving speed is 82 km/h (Manual speed limit: 80 km/h)'}
 
+    #time format to UAE
+    date_time_str = required_payload["time"]
+    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%yT%H:%M:%SZ')
+    date_time_obj+=timedelta(hours=4,minutes=30)
+    time_data=date_time_obj.strftime("%d/%m/%Y, %H:%M:%S (GMT+4)")
+
     req_subject = required_payload["vehicle_reg"] + " on route " + required_payload.get("group", "Not Available") + " - " + required_payload["route"] + " - " + required_payload["alert_comment"]
 
     req_message ="Subject: "+req_subject+"\n\n"
     req_message += "Hi Customer," + "\n"
     req_message += req_subject + "\n"
-    req_message += "Alert Location: https://www.google.com/maps/place/" + required_payload["location"] + "\n" + " Address: " + required_payload["geo_reference"] + "\n" + " Time: " + required_payload["time"].replace('T',' ').replace('Z','') + "\n" + " Reason: " + required_payload["alert_comment"] + "\n"
+    req_message += "Alert Location: https://www.google.com/maps/place/" + required_payload["location"] + "\n" + " Address: " + required_payload["geo_reference"] + "\n" + " Time: " + time_data + "\n" + " Reason: " + required_payload["alert_comment"] + "\n"
     req_message += "Tracking Link: " + required_payload["tracking_link"] + "\n\n"
     req_message += "The additional details for this alert are: " + "\n"
     req_message += "HTM Number :" + required_payload["htm"] + "\n"
