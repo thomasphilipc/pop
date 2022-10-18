@@ -103,7 +103,7 @@ def main(msg: func.QueueMessage) -> None:
     #time format to UAE
     date_time_str = required_payload["time"]
     date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ')
-    date_time_obj+=timedelta(hours=4,minutes=30)
+    date_time_obj+=timedelta(hours=4)
     time_data=date_time_obj.strftime("%d/%m/%Y, %H:%M:%S (GMT+4)")
 
     req_subject = required_payload["vehicle_reg"] + " on route " + required_payload.get("group", "Not Available") + " - " + required_payload["route"] + " - " + required_payload["alert_comment"]
