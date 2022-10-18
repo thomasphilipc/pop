@@ -102,7 +102,7 @@ def main(msg: func.QueueMessage) -> None:
 
     #time format to UAE
     date_time_str = required_payload["time"]
-    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%yT%H:%M:%SZ')
+    date_time_obj = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%SZ')
     date_time_obj+=timedelta(hours=4,minutes=30)
     time_data=date_time_obj.strftime("%d/%m/%Y, %H:%M:%S (GMT+4)")
 
