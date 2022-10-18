@@ -9,10 +9,10 @@
 import logging
 from azure.cosmosdb.table.tableservice import TableService
 from azure.cosmosdb.table.models import Entity
-import httpx
 import json
 import os
 import re
+import requests
 import azure.functions as func
 
 def process_field_type(data):
@@ -48,7 +48,7 @@ def process_response(payload,schema_json,i):
     ######
 
 
-async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
+def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
     
     #gather details from the OS environment
     tableStorageKey = os.environ["tableStorageKey"]
@@ -68,48 +68,45 @@ async def main(result2: str, changemanagementqueue: func.Out[str]) -> str:
     path = "api/v1/unit/custom_fields.json?include=device&key="+result2['apiKey']
     response_list=[]
     unit_list=result2["units"]
-    logging.debug("Data that is being send out")
-    logging.debug(result2["units"])
-    print(unit_list)
-    for i in unit_list:
-        params="&unit_id="+str(i)
-        constructed_url = endpoint + path + params
-        headers = {
+    if len(unit_list) > 0 :
+        for i in unit_list:
+            params="&unit_id="+str(i)
+            constructed_url = endpoint + path + params
+            headers = {
 
-       "Content-Type": "application/json"
-        }
-        client = httpx.AsyncClient()
-        response = await client.get(constructed_url, headers = headers)
-        payload = response.json()
+        "Content-Type": "application/json"
+            }
+            response = requests.request("GET", constructed_url, headers=headers)
+            payload = response.json()
 
-        data=process_response(payload,schema_json,i)
+            data=process_response(payload,schema_json,i)
 
-        query="RowKey eq '"+str(i)+"'"
-            ###
-        test = []
-        for entity in table_service.query_entities(table_name, filter=query):
-            xtest = json.dumps(entity, indent=4,sort_keys=True, default=str )
-            test.append(json.loads(xtest))
+            query="RowKey eq '"+str(i)+"'"
+                ###
+            test = []
+            for entity in table_service.query_entities(table_name, filter=query):
+                xtest = json.dumps(entity, indent=4,sort_keys=True, default=str )
+                test.append(json.loads(xtest))
 
-        if len(test)==0:
-            response_list.append(data)
-            table_service.insert_or_replace_entity(table_name,data)
-            #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
-        else :
-            db_data = test[0] 
-            ###
-            #'{"PackageType": null, "PackingListUpload": null, "TrackingLink": null}'
-            if db_data.get('CustomField') != data.get('CustomField'):
-                logging.info(" data variation and to be addded to database and queue %s",str(data))
+            if len(test)==0:
+                response_list.append(data)
                 table_service.insert_or_replace_entity(table_name,data)
-                response_list.append(json.dumps(data, indent=4, sort_keys=True, default=str))
                 #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
-            elif db_data.get('AdditionalField', None) == None:
-                response_list.append(json.dumps(data, indent=4, sort_keys=True, default=str))
-                #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
-                logging.info(" data variation not found but additional data needs to be processed %s",str(data))
-            else:
-                logging.info(" data variation not found  %s",str(data))
+            else :
+                db_data = test[0] 
+                ###
+                #'{"PackageType": null, "PackingListUpload": null, "TrackingLink": null}'
+                if db_data.get('CustomField') != data.get('CustomField'):
+                    logging.info(" data variation and to be addded to database and queue %s",str(data))
+                    table_service.insert_or_replace_entity(table_name,data)
+                    response_list.append(json.dumps(data, indent=4, sort_keys=True, default=str))
+                    #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+                elif db_data.get('AdditionalField', None) == None:
+                    response_list.append(json.dumps(data, indent=4, sort_keys=True, default=str))
+                    #changemanagementqueue.set(json.dumps(data, indent=4, sort_keys=True, default=str))
+                    logging.info(" data variation not found but additional data needs to be processed %s",str(data))
+                else:
+                    logging.info(" data variation not found  %s",str(data))
 
 
     #logging.info(" data to be pushed into database is %s",str(data))
