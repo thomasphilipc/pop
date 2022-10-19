@@ -59,7 +59,7 @@ def main(name: str) -> str:
 
     filename = unit_id + ".xlsx"
     result="No link passed to copy"
-    if len(link)>10:
+    if link:
         result= process_link(link,filename)
     
     return f" {result}!"

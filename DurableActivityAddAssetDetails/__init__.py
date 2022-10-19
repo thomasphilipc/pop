@@ -9,10 +9,9 @@
 import logging
 from azure.cosmosdb.table.tableservice import TableService
 from azure.cosmosdb.table.models import Entity
-import httpx
 import json
 import os
-
+import requests
 
 def process_response(payload,assetgroup):
     jsondata=json.dumps(payload)
@@ -42,7 +41,7 @@ def process_response(payload,assetgroup):
     
     return responselist
 
-async def main(result2: str) -> str:
+def main(result2: str) -> str:
     tableStorageKey = os.environ["tableStorageKey"]
     tableName = os.environ["tableName"]
     accountName = os.environ["accountName"]
@@ -62,8 +61,7 @@ async def main(result2: str) -> str:
 
         "Content-Type": "application/json"
         }
-        client = httpx.AsyncClient()
-        response = await client.get(constructed_url, headers = headers)
+        response = requests.request("GET", constructed_url, headers=headers)
         payload = response.json()
         data=process_response(payload,assetgroup)
 
