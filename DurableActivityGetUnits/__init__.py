@@ -33,8 +33,8 @@ def main(payload) -> str:
     # save to database
     saveToClientTable(payload)
 
-    return_value = (group_id,len(units))
-    return return_value
+
+    return payload
 
 
 def saveToClientTable(payload):

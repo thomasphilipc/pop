@@ -47,7 +47,7 @@ async def main(result2: str) -> str:
     tableName = os.environ["tableName"]
     accountName = os.environ["accountName"]
     logging.info( " data recieved in durable activityaddassetgroup is format %s",str(result2))
-    assetgroup=result2['clientName']
+    assetgroup=result2.get('clientName')
     endpoint = "https://mapon.com/"
     path = "api/v1/unit/list.json?include=device&key="+result2['apiKey']
     params=""
