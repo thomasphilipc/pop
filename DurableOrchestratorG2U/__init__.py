@@ -43,6 +43,6 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     parallel_tasks4 = [ context.call_activity("DurableActivityProcessFile", b) for b in action_list ]
     outputs4 = yield context.task_all(parallel_tasks4)
 
-    return [payload, outputs, outputs2,outputs3,outputs4]
+    return [outputs, outputs2,outputs4]
 
 main = df.Orchestrator.create(orchestrator_function)

@@ -74,6 +74,6 @@ async def main(result2: str) -> str:
             logging.info(" data to be pushed into database is %s",str(item))
             table_service.insert_or_replace_entity(table_name,item)
 
-        return f"Devices have been added and no output at this stage for{assetgroup}"
+        return f"Devices have been added for{assetgroup}"
     else:
-         return f"No Devices have been added and no output at this stage for{assetgroup}"
+         return f"No Devices in {assetgroup}"

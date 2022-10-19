@@ -58,8 +58,9 @@ def main(name: str) -> str:
     link = json_customfield.get("PackingListUpload")
 
     filename = unit_id + ".xlsx"
-
-    result= process_link(link,filename)
+    result="No link passed to copy"
+    if len(link)>10:
+        result= process_link(link,filename)
     
     return f" {result}!"
 
